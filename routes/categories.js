@@ -6,7 +6,12 @@ const table = "categories";
 
 router.get(prefix, async (_, res) => {
     try {
-        const roles = await pool.query(`select * from ${table};`);
+        const roles = await pool.query(`
+            select 
+            category_id,
+            category_name as name
+            from ${table};
+        `);
         return res.status(200).json(roles.rows);
     } catch (e) {
         return res.status(500).json({
@@ -15,10 +20,10 @@ router.get(prefix, async (_, res) => {
     }
 })
 
-router.post(prefix, async (req,res) => {
+router.post(prefix, async (req, res) => {
     try {
-        const {category_name} = req.body;
-        const response = await pool.query(`insert into ${table} (category_name) values ($1)`,[category_name]);
+        const { name } = req.body;
+        const response = await pool.query(`insert into ${table} (category_name) values ($1)`, [name]);
         return res.status(200).json({
             message: "Строка добавлена"
         });
@@ -29,11 +34,11 @@ router.post(prefix, async (req,res) => {
     }
 })
 
-router.put(prefix+"/:id", async (req,res) => {
+router.put(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const {category_name} = req.body;
-        const response = await pool.query(`update ${table} set category_name = $1 where category_id=$2`,[category_name,id]);
+        const { id } = req.params;
+        const { name } = req.body;
+        const response = await pool.query(`update ${table} set category_name = $1 where category_id=$2`, [name, id]);
         return res.status(200).json({
             message: "Строка обновлена"
         });
@@ -44,10 +49,10 @@ router.put(prefix+"/:id", async (req,res) => {
     }
 })
 
-router.delete(prefix+"/:id", async (req,res) => {
+router.delete(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const response = await pool.query(`delete from ${table} where category_id=$1`,[id]);
+        const { id } = req.params;
+        const response = await pool.query(`delete from ${table} where category_id=$1`, [id]);
         return res.status(200).json({
             message: "Строка удалена"
         });

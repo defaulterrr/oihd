@@ -6,7 +6,12 @@ const table = "status";
 
 router.get(prefix, async (_, res) => {
     try {
-        const roles = await pool.query(`select * from ${table};`);
+        const roles = await pool.query(`
+            select 
+            status_id,
+            status_label as name
+            from ${table};
+        `);
         return res.status(200).json(roles.rows);
     } catch (e) {
         return res.status(500).json({
@@ -15,10 +20,10 @@ router.get(prefix, async (_, res) => {
     }
 })
 
-router.post(prefix, async (req,res) => {
+router.post(prefix, async (req, res) => {
     try {
-        const {status_label} = req.body;
-        const response = await pool.query(`insert into ${table} (status_label) values ($1)`,[status_label]);
+        const { name } = req.body;
+        const response = await pool.query(`insert into ${table} (status_label) values ($1)`, [name]);
         return res.status(200).json({
             message: "Строка добавлена"
         });
@@ -29,12 +34,11 @@ router.post(prefix, async (req,res) => {
     }
 })
 
-router.put(prefix+"/:id", async (req,res) => {
+router.put(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const {status_label} = req.body;
-        console.log(id, status_label)
-        const response = await pool.query(`update ${table} set status_label = $1 where status_id=$2`,[status_label,id]);
+        const { id } = req.params;
+        const { name } = req.body;
+        const response = await pool.query(`update ${table} set status_label = $1 where status_id=$2`, [name, id]);
         return res.status(200).json({
             message: "Строка обновлена"
         });
@@ -45,10 +49,10 @@ router.put(prefix+"/:id", async (req,res) => {
     }
 })
 
-router.delete(prefix+"/:id", async (req,res) => {
+router.delete(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const response = await pool.query(`delete from ${table} where status_id=$1`,[id]);
+        const { id } = req.params;
+        const response = await pool.query(`delete from ${table} where status_id=$1`, [id]);
         return res.status(200).json({
             message: "Строка удалена"
         });
