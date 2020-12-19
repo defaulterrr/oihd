@@ -29,7 +29,7 @@ router.post(prefix, async (req,res) => {
         const response = await pool.query(`insert into ${table} 
         (news_title,news_category,news_createdby,news_createdat,news_status,news_permission,news_content) 
         values 
-        ($1,$2,$3,NOW(),$4,$5,$6)`,[news_title,news_category,news_createdby,news_status,news_permission,news_content]);
+        ($1,$2,(select users_id from users where users_name = $3),NOW(),$4,(select roles_id from roles where roles_name=$5),$6)`,[news_title,news_category,news_createdby,news_status,news_permission,news_content]);
         return res.status(200).json({
             message: "Строка добавлена"
         });
@@ -50,7 +50,7 @@ router.put(prefix+"/:id", async (req,res) => {
         const response = await pool.query(`update ${table} set
         (news_title,news_category,news_createdby,news_createdat,news_status,news_permission,news_content) 
         =
-        ($1,$2,$3,NOW(),$4,$5,$6) where news_id=$7`,[news_title,news_category,news_createdby,news_status,news_permission,news_content,id]);
+        ($1,$2,(select users_id from users where users_name = $3),NOW(),$4,(select roles_id from roles where roles_name=$5),$6) where news_id=$7`,[news_title,news_category,news_createdby,news_status,news_permission,news_content,id]);
         return res.status(200).json({
             message: "Строка обновлена"
         });
