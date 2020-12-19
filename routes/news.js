@@ -12,7 +12,6 @@ router.get(prefix, async (_, res) => {
         inner join categories on categories.category_id = ${table}.news_category
         inner join status on status.status_id = ${table}.news_status
         inner join roles on roles.roles_id = ${table}.news_permission
-        inner join 
         ;`);
         return res.status(200).json(roles.rows);
     } catch (e) {
