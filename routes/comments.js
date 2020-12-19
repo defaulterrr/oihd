@@ -7,10 +7,19 @@ const table = "comments";
 router.get(prefix, async (_, res) => {
     try {
         const roles = await pool.query(`
-        select * from ${table}
+        select 
+            comments_id as id,
+            comments_news_id as newsid,
+            comments_created_at as createdAt,
+            comments_created_by as createdBy,
+            content,
+            news.news_title as title,
+            users.users_name as owner
+        from ${table}
         inner join news on news.news_id = ${table}.comments_news_id
         inner join users on users.users_id = ${table}.comments_created_by
         ;`);
+        // const roles = await pool.query('select * from comments;')
         return res.status(200).json(roles.rows);
     } catch (e) {
         console.log(e);
@@ -22,12 +31,11 @@ router.get(prefix, async (_, res) => {
 
 router.post(prefix, async (req,res) => {
     try {
-        const {news_title,news_category,news_createdby,news_permission,news_content,news_status} = req.body;
-        console.log({news_title,news_category,news_createdby,news_permission,news_content});
+        const {news_id, created_by, content} = req.body;
         const response = await pool.query(`insert into ${table} 
-        (news_title,news_category,news_createdby,news_createdat,news_status,news_permission,news_content) 
+        (comments_news_id,comments_created_at,comments_created_by,content) 
         values 
-        ($1,$2,$3,NOW(),$4,$5,$6)`,[news_title,news_category,news_createdby,news_status,news_permission,news_content]);
+        ($1, NOW(),$2,$3)`,[news_id, created_by,content]);
         return res.status(200).json({
             message: "Строка добавлена"
         });
@@ -42,13 +50,11 @@ router.post(prefix, async (req,res) => {
 router.put(prefix+"/:id", async (req,res) => {
     try {
         const {id} = req.params;
-
-        const {news_title,news_category,news_createdby,news_permission,news_content,news_status} = req.body;
-        console.log({news_title,news_category,news_createdby,news_permission,news_content});
+        const {news_id, created_by,content} = req.body;
         const response = await pool.query(`update ${table} set
-        (news_title,news_category,news_createdby,news_createdat,news_status,news_permission,news_content) 
+        (comments_news_id, comments_created_by,content) 
         =
-        ($1,$2,$3,NOW(),$4,$5,$6) where news_id=$7`,[news_title,news_category,news_createdby,news_status,news_permission,news_content,id]);
+        ($1,$2,$3) where comments_id=$4`,[news_id, created_by,content,id]);
         return res.status(200).json({
             message: "Строка обновлена"
         });
@@ -63,7 +69,7 @@ router.put(prefix+"/:id", async (req,res) => {
 router.delete(prefix+"/:id", async (req,res) => {
     try {
         const {id} = req.params;
-        const response = await pool.query(`delete from ${table} where news_id=$1`,[id]);
+        const response = await pool.query(`delete from ${table} where comments_id=$1`,[id]);
         return res.status(200).json({
             message: "Строка удалена"
         });

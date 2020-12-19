@@ -8,6 +8,7 @@ const rolesC = require('./routes/roles');
 const statusC = require('./routes/status');
 const categoryC = require('./routes/categories');
 const newsC = require('./routes/news');
+const commentsC = require('./routes/comments');
 
 const app = express();
 app.use(cors(config.get('corsOptions')));
@@ -24,5 +25,6 @@ app.use(rolesC);
 app.use(statusC);
 app.use(newsC);
 app.use(categoryC);
+app.use(commentsC);
 
 app.listen('5000');
