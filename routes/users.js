@@ -6,7 +6,14 @@ const table = "users";
 
 router.get(prefix, async (_, res) => {
     try {
-        const users = await pool.query(`select * from ${table};`);
+        const users = await pool.query(`
+        select
+        users_id,
+        users_name as name,
+        roles_name as role
+        from users
+        inner join roles on users.users_role = roles.roles_id;
+        `);
         return res.status(200).json(users.rows);
     } catch (e) {
         return res.status(500).json({
@@ -15,10 +22,17 @@ router.get(prefix, async (_, res) => {
     }
 })
 
-router.post(prefix, async (req,res) => {
+router.post(prefix, async (req, res) => {
     try {
         const { name, role } = req.body;
-        const response = await pool.query(`insert into ${table} (users_name, users_role) values ($1,$2)`,[name,role]);
+        const response = await pool.query(`
+        insert into ${table} 
+        (users_name, users_role) 
+        values (
+            $1,
+            (SELECT roles_id FROM roles WHERE roles_name = $2)
+            );
+        `, [name, role]);
         return res.status(200).json({
             message: "Строка добавлена"
         });
@@ -29,11 +43,19 @@ router.post(prefix, async (req,res) => {
     }
 })
 
-router.put(prefix+"/:id", async (req,res) => {
+router.put(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const {name, role} = req.body;
-        const response = await pool.query(`update ${table} set (users_name,users_role) = ($1,$2) where users_id=$3`,[name,role,id]);
+        const { id } = req.params;
+        const { name, role } = req.body;
+        const response = await pool.query(`
+        update ${table} 
+        set (users_name,users_role) = 
+        (
+            $1,
+            (SELECT roles_id FROM roles WHERE roles_name = $2)
+            ) 
+        where users_id=$3;`,
+            [name, role, id]);
         return res.status(200).json({
             message: "Строка обновлена"
         });
@@ -44,10 +66,10 @@ router.put(prefix+"/:id", async (req,res) => {
     }
 })
 
-router.delete(prefix+"/:id", async (req,res) => {
+router.delete(prefix + "/:id", async (req, res) => {
     try {
-        const {id} = req.params;
-        const response = await pool.query(`delete from ${table} where users_id=$1`,[id]);
+        const { id } = req.params;
+        const response = await pool.query(`delete from ${table} where users_id=$1`, [id]);
         return res.status(200).json({
             message: "Строка удалена"
         });
